@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const User = require("./modals/User");
 const authMiddleware = require("./middleware/auth");
+const taskRoutes = require("./routes/taskRoutes");
+const errorMiddleware = require("./middleware/errorMiddleware");
+
 
 const app = express();
 
@@ -132,6 +135,9 @@ app.post("/login", async (req, res) => {
     });
 });
 
+ app.use("/tasks", taskRoutes);
+
+ app.use(errorMiddleware);
 
 app.listen(3009, () => {
     console.log("TaskFlow server is running on port 3009");

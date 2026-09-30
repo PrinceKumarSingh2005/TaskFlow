@@ -1,10 +1,6 @@
 const errorMiddleware = (error, req, res, next) => {
  
-    console.log("ERROR MIDDLEWARE HIT ");
-    console.log(error);
-    console.log(error.errors);
-    console.log(Object.keys(error.errors));
-
+    
     
 
     
@@ -32,6 +28,7 @@ const errorMiddleware = (error, req, res, next) => {
     res.status(statusCode).json({
         statusCode: statusCode,
         message: error.message,
+        
         errors: errors
     });
 };

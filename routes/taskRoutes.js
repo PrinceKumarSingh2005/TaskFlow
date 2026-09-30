@@ -36,19 +36,67 @@ router.post("/", authMiddleware, async (req, res, next) => {
 router.get("/", authMiddleware, async (req, res, next) => {
 
     try{
-        const tasks = await Task.find({
-        userId: req.user.userId
-    });
 
+        const page = Number(req.query.page || 1);
+        const limit = Number(req.query.limit || 10);
+        const status = req.query.status;
+        const search = req.query.search;
+        const sort = req.query.sort; 
+
+        let sortOrder = -1;
+
+        if(sort === "oldest"){
+            sortOrder = 1; 
+        }
+
+        const filter = {
+            userId: req.user.userId
+        };
+
+        if(status){
+            filter.status = status;
+        }
+
+        if(search){
+            filter.$or = [
+                {
+                    title: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+                {
+                    description: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                }
+            ];
+        }
+        const skip = (page -1)* limit; 
+
+      const [tasks, totalTasks] = await Promise.all([
+           
+        Task.find(filter)
+        .sort({createdAt: sortOrder})
+        .skip(skip)
+        .limit(limit),
+
+        Task.countDocuments(filter)
+      ]);
+      const totalPages = Math.ceil(totalTasks / limit);
      
-    
 res.status(200).json({
-    tasks
+    tasks,
+    totalTasks,
+    totalPages,
+    page,
+    limit
 });
  
     }
     catch(error){
-        next(error);
+        next(error);  
     }
      
 
